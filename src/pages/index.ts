@@ -1,0 +1,9 @@
+export { default as DashboardPage } from "./DashboardPage";
+export { default as ClaimsPage } from "./ClaimsPage";
+export { default as PatientsPage } from "./PatientsPage";
+export { default as TasksPage } from "./TasksPage";
+export { default as PaymentsPage } from "./PaymentsPage";
+export { LandingPage } from "./LandingPage";
+export { LoginPage } from "./LoginPage";
+export { SettingsPage } from "./SettingsPage";
+export { SignupPage } from "./SignupPage";
