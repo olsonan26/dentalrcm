@@ -190,6 +190,28 @@ const schema = defineSchema({
     .index("by_status", ["status"])
     .index("by_practice_and_status", ["practiceId", "status"])
     .index("by_priority", ["priority"]),
+  // Claim activity log (notes, status changes, scrub results, appeal letters)
+  claimActivities: defineTable({
+    practiceId: v.id("practices"),
+    claimId: v.id("claims"),
+    type: v.union(
+      v.literal("note"),
+      v.literal("status_change"),
+      v.literal("scrub_result"),
+      v.literal("appeal_letter"),
+      v.literal("system")
+    ),
+    content: v.string(),
+    metadata: v.optional(v.object({
+      oldStatus: v.optional(v.string()),
+      newStatus: v.optional(v.string()),
+      scrubScore: v.optional(v.number()),
+      appealLetterText: v.optional(v.string()),
+    })),
+    createdBy: v.optional(v.id("users")),
+  })
+    .index("by_claim", ["claimId"])
+    .index("by_practice", ["practiceId"]),
 });
 
 export default schema;
