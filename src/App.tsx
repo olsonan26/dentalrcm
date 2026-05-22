@@ -11,6 +11,7 @@ import {
   DashboardPage,
   LandingPage,
   LoginPage,
+  PatientDetailPage,
   PatientsPage,
   PaymentsPage,
   SettingsPage,
@@ -37,6 +38,7 @@ function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/claims" element={<ClaimsPage />} />
               <Route path="/patients" element={<PatientsPage />} />
+              <Route path="/patients/:id" element={<PatientDetailPage />} />
               <Route path="/tasks" element={<TasksPage />} />
               <Route path="/payments" element={<PaymentsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
