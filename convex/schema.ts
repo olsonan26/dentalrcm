@@ -190,6 +190,63 @@ const schema = defineSchema({
     .index("by_status", ["status"])
     .index("by_practice_and_status", ["practiceId", "status"])
     .index("by_priority", ["priority"]),
+  // Audit log for compliance tracking
+  auditLogs: defineTable({
+    practiceId: v.id("practices"),
+    entityType: v.union(
+      v.literal("claim"),
+      v.literal("payment"),
+      v.literal("patient"),
+      v.literal("provider"),
+      v.literal("task"),
+      v.literal("practice"),
+      v.literal("member")
+    ),
+    entityId: v.string(), // ID of the affected record
+    action: v.union(
+      v.literal("create"),
+      v.literal("update"),
+      v.literal("delete"),
+      v.literal("status_change"),
+      v.literal("reconcile"),
+      v.literal("batch_post"),
+      v.literal("role_change"),
+      v.literal("ai_scrub"),
+      v.literal("appeal"),
+      v.literal("eligibility_check")
+    ),
+    description: v.string(),
+    changes: v.optional(v.string()), // JSON-stringified before/after
+    performedBy: v.optional(v.id("users")),
+    performedByName: v.optional(v.string()),
+    ipAddress: v.optional(v.string()),
+  })
+    .index("by_practice", ["practiceId"])
+    .index("by_entity", ["entityType", "entityId"])
+    .index("by_performed_by", ["performedBy"]),
+
+  // Practice team members with roles
+  practiceMembers: defineTable({
+    practiceId: v.id("practices"),
+    userId: v.id("users"),
+    role: v.union(
+      v.literal("owner"),
+      v.literal("admin"),
+      v.literal("billing_manager"),
+      v.literal("billing_specialist"),
+      v.literal("viewer")
+    ),
+    firstName: v.string(),
+    lastName: v.string(),
+    email: v.string(),
+    status: v.union(v.literal("active"), v.literal("invited"), v.literal("deactivated")),
+    invitedAt: v.optional(v.string()),
+    lastActiveAt: v.optional(v.string()),
+  })
+    .index("by_practice", ["practiceId"])
+    .index("by_user", ["userId"])
+    .index("by_practice_and_user", ["practiceId", "userId"]),
+
   // Claim activity log (notes, status changes, scrub results, appeal letters)
   claimActivities: defineTable({
     practiceId: v.id("practices"),

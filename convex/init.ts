@@ -15,6 +15,76 @@ export const ensureSeedData = mutation({
       .withIndex("by_owner", (q) => q.eq("ownerId", userId))
       .first();
 
+    // Seed audit logs and practice members for existing practices that predate Batch 4
+    if (existing) {
+      const existingMembers = await ctx.db
+        .query("practiceMembers")
+        .withIndex("by_practice", (q) => q.eq("practiceId", existing._id))
+        .first();
+
+      if (!existingMembers) {
+        const practiceId = existing._id;
+
+        // Practice Members (RBAC)
+        await ctx.db.insert("practiceMembers", {
+          practiceId,
+          userId,
+          role: "owner",
+          firstName: "Practice",
+          lastName: "Owner",
+          email: "owner@brightsmile.dental",
+          status: "active",
+        });
+        await ctx.db.insert("practiceMembers", {
+          practiceId,
+          userId,
+          role: "billing_manager",
+          firstName: "Lisa",
+          lastName: "Rodriguez",
+          email: "l.rodriguez@brightsmile.dental",
+          status: "active",
+        });
+        await ctx.db.insert("practiceMembers", {
+          practiceId,
+          userId,
+          role: "billing_specialist",
+          firstName: "Kevin",
+          lastName: "Nguyen",
+          email: "k.nguyen@brightsmile.dental",
+          status: "active",
+        });
+        await ctx.db.insert("practiceMembers", {
+          practiceId,
+          userId,
+          role: "viewer",
+          firstName: "Amanda",
+          lastName: "Foster",
+          email: "a.foster@brightsmile.dental",
+          status: "invited",
+          invitedAt: "2026-05-20",
+        });
+
+        // Audit Logs
+        const auditEntries = [
+          { entityType: "claim" as const, entityId: "seed", action: "create" as const, description: "Created claim CLM-2026-0001 for James Wilson", performedByName: "Lisa Rodriguez" },
+          { entityType: "claim" as const, entityId: "seed", action: "ai_scrub" as const, description: "AI scrub completed for CLM-2026-0004 — Score: 72%", performedByName: "System" },
+          { entityType: "claim" as const, entityId: "seed", action: "status_change" as const, description: "Claim CLM-2026-0001 status changed from submitted to paid", performedByName: "Lisa Rodriguez" },
+          { entityType: "payment" as const, entityId: "seed", action: "create" as const, description: "Payment of $212.00 posted for James Wilson from Delta Dental", performedByName: "Kevin Nguyen" },
+          { entityType: "payment" as const, entityId: "seed", action: "reconcile" as const, description: "Payment reconciled — ERA-2026-0502 matched to CLM-2026-0007", performedByName: "Kevin Nguyen" },
+          { entityType: "claim" as const, entityId: "seed", action: "status_change" as const, description: "Claim CLM-2026-0003 denied — Missing pre-operative radiograph", performedByName: "System" },
+          { entityType: "claim" as const, entityId: "seed", action: "appeal" as const, description: "Appeal submitted for CLM-2026-0010 — Procedure coverage dispute", performedByName: "Lisa Rodriguez" },
+          { entityType: "patient" as const, entityId: "seed", action: "create" as const, description: "New patient registered: Emily Davis (DOB: 01/30/1998)", performedByName: "Lisa Rodriguez" },
+          { entityType: "patient" as const, entityId: "seed", action: "eligibility_check" as const, description: "Eligibility verified for Jennifer Anderson — United Concordia Tricare Dental", performedByName: "Kevin Nguyen" },
+          { entityType: "member" as const, entityId: "seed", action: "create" as const, description: "Invited Amanda Foster (a.foster@brightsmile.dental) as viewer", performedByName: "Practice Owner" },
+          { entityType: "payment" as const, entityId: "seed", action: "batch_post" as const, description: "Batch posted 3 payment(s)", performedByName: "Kevin Nguyen" },
+          { entityType: "claim" as const, entityId: "seed", action: "create" as const, description: "Created claim CLM-2026-0002 for Maria Garcia — Ortho treatment $5,635.00", performedByName: "Lisa Rodriguez" },
+        ];
+        for (const entry of auditEntries) {
+          await ctx.db.insert("auditLogs", { practiceId, ...entry });
+        }
+      }
+    }
+
     if (!existing) {
       // Seed demo data inline (calling internal mutation not allowed from mutation)
       // Instead, we'll seed directly here
@@ -227,6 +297,68 @@ export const ensureSeedData = mutation({
 
       for (const t of tasksData) {
         await ctx.db.insert("tasks", { practiceId, assignedTo: userId, ...t });
+      }
+
+      // Practice Members (RBAC)
+      await ctx.db.insert("practiceMembers", {
+        practiceId,
+        userId,
+        role: "owner",
+        firstName: "Practice",
+        lastName: "Owner",
+        email: "owner@brightsmile.dental",
+        status: "active",
+      });
+
+      await ctx.db.insert("practiceMembers", {
+        practiceId,
+        userId,
+        role: "billing_manager",
+        firstName: "Lisa",
+        lastName: "Rodriguez",
+        email: "l.rodriguez@brightsmile.dental",
+        status: "active",
+      });
+
+      await ctx.db.insert("practiceMembers", {
+        practiceId,
+        userId,
+        role: "billing_specialist",
+        firstName: "Kevin",
+        lastName: "Nguyen",
+        email: "k.nguyen@brightsmile.dental",
+        status: "active",
+      });
+
+      await ctx.db.insert("practiceMembers", {
+        practiceId,
+        userId,
+        role: "viewer",
+        firstName: "Amanda",
+        lastName: "Foster",
+        email: "a.foster@brightsmile.dental",
+        status: "invited",
+        invitedAt: "2026-05-20",
+      });
+
+      // Audit Logs (sample entries)
+      const auditEntries = [
+        { entityType: "claim" as const, entityId: "seed", action: "create" as const, description: "Created claim CLM-2026-0001 for James Wilson", performedByName: "Lisa Rodriguez" },
+        { entityType: "claim" as const, entityId: "seed", action: "ai_scrub" as const, description: "AI scrub completed for CLM-2026-0004 — Score: 72%", performedByName: "System" },
+        { entityType: "claim" as const, entityId: "seed", action: "status_change" as const, description: "Claim CLM-2026-0001 status changed from submitted to paid", performedByName: "Lisa Rodriguez" },
+        { entityType: "payment" as const, entityId: "seed", action: "create" as const, description: "Payment of $212.00 posted for James Wilson from Delta Dental", performedByName: "Kevin Nguyen" },
+        { entityType: "payment" as const, entityId: "seed", action: "reconcile" as const, description: "Payment reconciled — ERA-2026-0502 matched to CLM-2026-0007", performedByName: "Kevin Nguyen" },
+        { entityType: "claim" as const, entityId: "seed", action: "status_change" as const, description: "Claim CLM-2026-0003 denied — Missing pre-operative radiograph", performedByName: "System" },
+        { entityType: "claim" as const, entityId: "seed", action: "appeal" as const, description: "Appeal submitted for CLM-2026-0010 — Procedure coverage dispute", performedByName: "Lisa Rodriguez" },
+        { entityType: "patient" as const, entityId: "seed", action: "create" as const, description: "New patient registered: Emily Davis (DOB: 01/30/1998)", performedByName: "Lisa Rodriguez" },
+        { entityType: "patient" as const, entityId: "seed", action: "eligibility_check" as const, description: "Eligibility verified for Jennifer Anderson — United Concordia Tricare Dental", performedByName: "Kevin Nguyen" },
+        { entityType: "member" as const, entityId: "seed", action: "create" as const, description: "Invited Amanda Foster (a.foster@brightsmile.dental) as viewer", performedByName: "Practice Owner" },
+        { entityType: "payment" as const, entityId: "seed", action: "batch_post" as const, description: "Batch posted 3 payment(s)", performedByName: "Kevin Nguyen" },
+        { entityType: "claim" as const, entityId: "seed", action: "create" as const, description: "Created claim CLM-2026-0002 for Maria Garcia — Ortho treatment $5,635.00", performedByName: "Lisa Rodriguez" },
+      ];
+
+      for (const entry of auditEntries) {
+        await ctx.db.insert("auditLogs", { practiceId, ...entry });
       }
     }
 

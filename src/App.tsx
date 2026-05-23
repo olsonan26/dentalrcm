@@ -7,6 +7,7 @@ import { PublicOnlyRoute } from "./components/PublicOnlyRoute";
 import { Toaster } from "./components/ui/sonner";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import {
+  AuditLogPage,
   ClaimsPage,
   DashboardPage,
   LandingPage,
@@ -18,6 +19,7 @@ import {
   SettingsPage,
   SignupPage,
   TasksPage,
+  TeamPage,
 } from "./pages";
 
 function App() {
@@ -43,6 +45,8 @@ function App() {
               <Route path="/reports" element={<ReportsPage />} />
               <Route path="/tasks" element={<TasksPage />} />
               <Route path="/payments" element={<PaymentsPage />} />
+              <Route path="/audit-log" element={<AuditLogPage />} />
+              <Route path="/team" element={<TeamPage />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
           </Route>

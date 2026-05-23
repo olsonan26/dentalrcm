@@ -9,8 +9,10 @@ import {
   LogOut,
   Moon,
   Settings,
+  Shield,
   Sun,
   Users,
+  UsersRound,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -48,6 +50,11 @@ const rcmNav = [
   { href: "/reports", label: "Reports", icon: BarChart3 },
   { href: "/tasks", label: "Tasks", icon: ClipboardList },
   { href: "/payments", label: "Payments", icon: BanknoteIcon },
+];
+
+const adminNav = [
+  { href: "/audit-log", label: "Audit Log", icon: Shield },
+  { href: "/team", label: "Team", icon: UsersRound },
 ];
 
 function NavLink({
@@ -103,6 +110,25 @@ function SidebarNav() {
         <SidebarGroupContent>
           <SidebarMenu>
             {rcmNav.map((item) => (
+              <NavLink
+                key={item.href}
+                href={item.href}
+                label={item.label}
+                icon={item.icon}
+                isActive={location.pathname === item.href}
+              />
+            ))}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
+      <SidebarGroup>
+        <SidebarGroupLabel className="text-xs uppercase tracking-wider">
+          Administration
+        </SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            {adminNav.map((item) => (
               <NavLink
                 key={item.href}
                 href={item.href}

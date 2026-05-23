@@ -5,6 +5,8 @@ export { default as PatientDetailPage } from "./PatientDetailPage";
 export { default as ReportsPage } from "./ReportsPage";
 export { default as TasksPage } from "./TasksPage";
 export { default as PaymentsPage } from "./PaymentsPage";
+export { default as AuditLogPage } from "./AuditLogPage";
+export { default as TeamPage } from "./TeamPage";
 export { LandingPage } from "./LandingPage";
 export { LoginPage } from "./LoginPage";
 export { SettingsPage } from "./SettingsPage";
