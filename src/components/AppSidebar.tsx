@@ -2,6 +2,7 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
 import {
   BanknoteIcon,
+  BarChart3,
   ClipboardList,
   FileText,
   LayoutDashboard,
@@ -44,6 +45,7 @@ const mainNav = [
 const rcmNav = [
   { href: "/claims", label: "Claims", icon: FileText },
   { href: "/patients", label: "Patients", icon: Users },
+  { href: "/reports", label: "Reports", icon: BarChart3 },
   { href: "/tasks", label: "Tasks", icon: ClipboardList },
   { href: "/payments", label: "Payments", icon: BanknoteIcon },
 ];
