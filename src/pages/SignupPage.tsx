@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { SignUp } from "@/components/SignUp";
-import { TestUserLoginSection } from "@/components/TestUserLoginSection";
 import { Button } from "@/components/ui/button";
 
 export function SignupPage() {
@@ -14,7 +13,18 @@ export function SignupPage() {
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
           <div className="mx-auto size-12 rounded-xl bg-primary flex items-center justify-center mb-4">
-            <span className="text-primary-foreground font-bold text-lg">M</span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              className="size-7 text-primary-foreground"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
           </div>
           <h1 className="text-2xl font-bold tracking-tight">
             Create an account
@@ -24,7 +34,6 @@ export function SignupPage() {
           </p>
         </div>
 
-        <TestUserLoginSection />
         <SignUp />
 
         <p className="text-center text-sm text-muted-foreground">

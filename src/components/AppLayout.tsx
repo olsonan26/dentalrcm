@@ -1,4 +1,5 @@
 import { useQuery } from "convex/react";
+import { useAuth } from "@/contexts/SupabaseAuthContext";
 import { Bell, ChevronRight } from "lucide-react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { api } from "../../convex/_generated/api";
@@ -132,7 +133,8 @@ function NotificationBell({ practiceId }: { practiceId: string | undefined }) {
 }
 
 export function AppLayout() {
-  const practice = useQuery(api.practices.getByOwner);
+  const { convexUserId } = useAuth();
+  const practice = useQuery(api.practices.getByOwner, convexUserId ? { userId: convexUserId } : "skip");
 
   return (
     <SidebarProvider>

@@ -1,4 +1,4 @@
-import { useConvexAuth } from "convex/react";
+import { useAuth } from "@/contexts/SupabaseAuthContext";
 import {
   ArrowRight,
   BarChart3,
@@ -171,7 +171,7 @@ const faqs = [
 ];
 
 export function LandingPage() {
-  const { isAuthenticated, isLoading } = useConvexAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">

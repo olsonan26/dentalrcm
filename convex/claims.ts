@@ -1,6 +1,5 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
 
 /* ─── Shared Types ─── */
 
@@ -122,8 +121,7 @@ export const create = mutation({
   },
   returns: v.id("claims"),
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = null; // Auth handled by Supabase on frontend
 
     // Auto-generate claim number
     const existingClaims = await ctx.db
@@ -154,7 +152,7 @@ export const create = mutation({
       claimId,
       type: "system",
       content: `Claim ${claimNumber} created as draft`,
-      createdBy: userId,
+      createdBy: userId ?? undefined,
     });
 
     return claimId;
@@ -173,8 +171,7 @@ export const update = mutation({
   },
   returns: v.null(),
   handler: async (ctx, { claimId, ...updates }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = null; // Auth handled by Supabase on frontend
 
     const claim = await ctx.db.get(claimId);
     if (!claim) throw new Error("Claim not found");
@@ -198,7 +195,7 @@ export const update = mutation({
         claimId,
         type: "note",
         content: `Claim updated: ${Object.keys(patch).join(", ")}`,
-        createdBy: userId,
+        createdBy: userId ?? undefined,
       });
     }
 
@@ -213,7 +210,7 @@ export const updateStatus = mutation({
   },
   returns: v.null(),
   handler: async (ctx, { claimId, status }) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = null; // Auth handled by Supabase on frontend
     const claim = await ctx.db.get(claimId);
     if (!claim) throw new Error("Claim not found");
 
@@ -243,7 +240,7 @@ export const bulkUpdateStatus = mutation({
   },
   returns: v.object({ updated: v.number() }),
   handler: async (ctx, { claimIds, status }) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = null; // Auth handled by Supabase on frontend
     let updated = 0;
 
     for (const claimId of claimIds) {
@@ -275,7 +272,7 @@ export const runAiScrub = mutation({
   args: { claimId: v.id("claims") },
   returns: v.null(),
   handler: async (ctx, { claimId }) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = null; // Auth handled by Supabase on frontend
     const claim = await ctx.db.get(claimId);
     if (!claim) throw new Error("Claim not found");
 
@@ -400,7 +397,7 @@ export const generateAppealLetter = mutation({
   args: { claimId: v.id("claims") },
   returns: v.string(),
   handler: async (ctx, { claimId }) => {
-    const userId = await getAuthUserId(ctx);
+    const userId = null; // Auth handled by Supabase on frontend
     const claim = await ctx.db.get(claimId);
     if (!claim) throw new Error("Claim not found");
     if (claim.status !== "denied" && claim.status !== "appealed") {

@@ -1,8 +1,8 @@
-import { useAuthActions } from "@convex-dev/auth/react";
-import { useMutation, useQuery } from "convex/react";
+import { useMutation } from "convex/react";
 import { ChevronRight, Loader2, Moon, Palette, Sun, User } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/SupabaseAuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,9 +21,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { api } from "../../convex/_generated/api";
 
 export function SettingsPage() {
-  const user = useQuery(api.auth.currentUser);
+  const { user: supaUser, signOut, updatePassword, convexUserId } = useAuth();
   const { theme, toggleTheme, switchable } = useTheme();
-  const { signIn, signOut } = useAuthActions();
   const deleteAccount = useMutation(api.users.deleteAccount);
   const navigate = useNavigate();
 
@@ -32,59 +31,45 @@ export function SettingsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [passwordStep, setPasswordStep] = useState<"request" | "verify">(
-    "request",
-  );
 
-  const handleRequestPasswordReset = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  const userName = supaUser?.user_metadata?.name || supaUser?.email?.split("@")[0] || "User";
+  const userEmail = supaUser?.email || "";
 
-    const formData = new FormData();
-    formData.append("email", user?.email || "");
-    formData.append("flow", "reset");
-
-    try {
-      await signIn("password", formData);
-      setPasswordStep("verify");
-    } catch {
-      setError("Could not send reset code. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    formData.append("email", user?.email || "");
-    formData.append("flow", "reset-verification");
+    const newPassword = formData.get("newPassword") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
 
-    try {
-      await signIn("password", formData);
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
+
+    const { error: err } = await updatePassword(newPassword);
+    if (err) {
+      setError(err.message);
+    } else {
       setSuccess("Password changed successfully!");
       setTimeout(() => {
         setChangePasswordOpen(false);
-        setPasswordStep("request");
         setSuccess("");
       }, 1500);
-    } catch {
-      setError("Invalid code or password. Please try again.");
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const handleDeleteAccount = async () => {
     setLoading(true);
     setError("");
-
     try {
-      await deleteAccount();
+      if (convexUserId) {
+        await deleteAccount({ userId: convexUserId });
+      }
       await signOut();
       navigate("/");
     } catch {
@@ -99,7 +84,7 @@ export function SettingsPage() {
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
           Settings
         </h1>
-        <p className="text-muted-foreground mt-1">Page subtitle goes here</p>
+        <p className="text-muted-foreground mt-1">Manage your account</p>
       </div>
 
       <Card className="overflow-hidden">
@@ -108,14 +93,12 @@ export function SettingsPage() {
           <div className="flex items-end gap-4">
             <Avatar className="size-16 border-4 border-background shadow-lg">
               <AvatarFallback className="text-xl bg-primary text-primary-foreground">
-                {user?.name?.charAt(0).toUpperCase() || (
-                  <User className="size-6" />
-                )}
+                {userName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div className="pb-1">
-              <p className="font-semibold">{user?.name || "User"}</p>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
+              <p className="font-semibold">{userName}</p>
+              <p className="text-sm text-muted-foreground">{userEmail}</p>
             </div>
           </div>
         </CardContent>
@@ -144,7 +127,7 @@ export function SettingsPage() {
                     Dark mode
                   </Label>
                   <p className="text-sm text-muted-foreground">
-                    Toggle description goes here
+                    Switch between light and dark themes
                   </p>
                 </div>
               </div>
@@ -204,94 +187,58 @@ export function SettingsPage() {
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
             <DialogDescription>
-              {passwordStep === "request"
-                ? "We'll send a verification code to your email."
-                : "Enter the code from your email and your new password."}
+              Enter your new password below.
             </DialogDescription>
           </DialogHeader>
-
-          {passwordStep === "request" ? (
-            <form onSubmit={handleRequestPasswordReset}>
-              <div className="py-4">
-                <p className="text-sm text-muted-foreground">
-                  A reset code will be sent to:{" "}
-                  <span className="font-medium text-foreground">
-                    {user?.email}
-                  </span>
-                </p>
-              </div>
-              {error && (
-                <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2 mb-4">
-                  {error}
-                </p>
-              )}
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setChangePasswordOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading && <Loader2 className="size-4 animate-spin" />}
-                  Send Code
-                </Button>
-              </DialogFooter>
-            </form>
-          ) : (
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="code">Verification Code</Label>
-                <Input
-                  id="code"
-                  name="code"
-                  type="text"
-                  placeholder="Enter code from email"
-                  autoComplete="one-time-code"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input
-                  id="newPassword"
-                  name="newPassword"
-                  type="password"
-                  placeholder="••••••••"
-                  minLength={6}
-                  autoComplete="new-password"
-                  required
-                />
-              </div>
-              {error && (
-                <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">
-                  {error}
-                </p>
-              )}
-              {success && (
-                <p className="text-sm text-success bg-success/10 rounded-lg px-3 py-2">
-                  {success}
-                </p>
-              )}
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setPasswordStep("request");
-                    setError("");
-                  }}
-                >
-                  Back
-                </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading && <Loader2 className="size-4 animate-spin" />}
-                  Change Password
-                </Button>
-              </DialogFooter>
-            </form>
-          )}
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">New Password</Label>
+              <Input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                placeholder="••••••••"
+                minLength={6}
+                autoComplete="new-password"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                minLength={6}
+                autoComplete="new-password"
+                required
+              />
+            </div>
+            {error && (
+              <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">
+                {error}
+              </p>
+            )}
+            {success && (
+              <p className="text-sm text-green-600 bg-green-50 rounded-lg px-3 py-2">
+                {success}
+              </p>
+            )}
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setChangePasswordOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading && <Loader2 className="size-4 animate-spin" />}
+                Change Password
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 

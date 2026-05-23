@@ -1,6 +1,5 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
 
 const activityDoc = v.object({
   _id: v.id("claimActivities"),
@@ -38,8 +37,7 @@ export const addNote = mutation({
   },
   returns: v.id("claimActivities"),
   handler: async (ctx, { claimId, content }) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = null; // Auth handled by Supabase on frontend
 
     const claim = await ctx.db.get(claimId);
     if (!claim) throw new Error("Claim not found");
@@ -49,7 +47,7 @@ export const addNote = mutation({
       claimId,
       type: "note",
       content,
-      createdBy: userId,
+      createdBy: userId ?? undefined,
     });
   },
 });

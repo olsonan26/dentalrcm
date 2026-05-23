@@ -1,17 +1,18 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
 import { mutation } from "./_generated/server";
+import { v } from "convex/values";
 
 export const deleteAccount = mutation({
-  args: {},
-  handler: async ctx => {
-    const userId = await getAuthUserId(ctx);
+  args: { userId: v.optional(v.id("users")) },
+  handler: async (ctx, args) => {
+    const userId = args.userId ?? null;
     if (!userId) {
-      throw new Error("Not authenticated");
+      throw new Error("User ID required");
     }
 
+    // Clean up auth-related records if they exist
     const authAccounts = await ctx.db
       .query("authAccounts")
-      .filter(q => q.eq(q.field("userId"), userId))
+      .filter((q) => q.eq(q.field("userId"), userId))
       .collect();
     for (const account of authAccounts) {
       await ctx.db.delete(account._id);
@@ -19,7 +20,7 @@ export const deleteAccount = mutation({
 
     const authSessions = await ctx.db
       .query("authSessions")
-      .filter(q => q.eq(q.field("userId"), userId))
+      .filter((q) => q.eq(q.field("userId"), userId))
       .collect();
     for (const session of authSessions) {
       await ctx.db.delete(session._id);

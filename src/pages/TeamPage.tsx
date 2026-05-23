@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/SupabaseAuthContext";
 import { useMutation, useQuery } from "convex/react";
 import {
   Crown,
@@ -361,7 +362,8 @@ function PermissionsMatrix() {
 
 /* ─── Main Page ─── */
 export default function TeamPage() {
-  const practice = useQuery(api.practices.getByOwner);
+  const { convexUserId } = useAuth();
+  const practice = useQuery(api.practices.getByOwner, convexUserId ? { userId: convexUserId } : "skip");
   const members = useQuery(
     api.practiceMembers.listByPractice,
     practice ? { practiceId: practice._id } : "skip"

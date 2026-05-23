@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/SupabaseAuthContext";
 import { useQuery } from "convex/react";
 import {
   Activity,
@@ -127,7 +128,8 @@ function AuditLogEntry({ log }: { log: any }) {
 
 /* ─── Main Page ─── */
 export default function AuditLogPage() {
-  const practice = useQuery(api.practices.getByOwner);
+  const { convexUserId } = useAuth();
+  const practice = useQuery(api.practices.getByOwner, convexUserId ? { userId: convexUserId } : "skip");
   const [entityFilter, setEntityFilter] = useState<string>("all");
 
   const logs = useQuery(

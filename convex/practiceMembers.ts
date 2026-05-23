@@ -55,8 +55,7 @@ export const addMember = mutation({
 
     // We create the member entry — in production, this would trigger an invite email
     // For now, create with a placeholder userId
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
+    const identity = await ctx.auth.getUserIdentity(); // May be null (Supabase auth)
 
     // Look up the user by email, or use the current user as placeholder
     const users = await ctx.db.query("users").collect();
@@ -66,7 +65,7 @@ export const addMember = mutation({
 
     const memberId = await ctx.db.insert("practiceMembers", {
       practiceId: args.practiceId,
-      userId: existingUser?._id ?? (identity.subject as any),
+      userId: existingUser?._id ?? (identity?.subject as any),
       firstName: args.firstName,
       lastName: args.lastName,
       email: args.email,
@@ -82,7 +81,7 @@ export const addMember = mutation({
       entityId: memberId,
       action: "create",
       description: `Invited ${args.firstName} ${args.lastName} (${args.email}) as ${args.role.replace("_", " ")}`,
-      performedByName: identity.name ?? "System",
+      performedByName: identity?.name ?? "System",
     });
 
     return memberId;
@@ -177,7 +176,7 @@ export const getMyRole = query({
       // For practice owners, return owner role
       const users = await ctx.db.query("users").collect();
       const currentUser = users.find(
-        (u: any) => u.email === identity.email
+        (u: any) => u.email === identity?.email
       );
       if (currentUser && practice.ownerId === currentUser._id) {
         return { role: "owner" as const, memberId: null };
@@ -187,7 +186,7 @@ export const getMyRole = query({
     const member = await ctx.db
       .query("practiceMembers")
       .withIndex("by_practice", (q) => q.eq("practiceId", practiceId))
-      .filter((q) => q.eq(q.field("email"), identity.email))
+      .filter((q) => q.eq(q.field("email"), identity?.email ?? ""))
       .first();
 
     return member

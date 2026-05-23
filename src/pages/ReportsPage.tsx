@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/SupabaseAuthContext";
 import { useQuery } from "convex/react";
 import {
   BarChart3,
@@ -574,7 +575,8 @@ function ReportSkeleton() {
 
 /* ─── Main Page ─── */
 export default function ReportsPage() {
-  const practice = useQuery(api.practices.getByOwner);
+  const { convexUserId } = useAuth();
+  const practice = useQuery(api.practices.getByOwner, convexUserId ? { userId: convexUserId } : "skip");
 
   if (!practice) {
     return (

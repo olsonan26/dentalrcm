@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/SupabaseAuthContext";
 import { useQuery, useMutation } from "convex/react";
 import {
   AlertCircle,
@@ -859,7 +860,8 @@ function BulkActionBar({
 
 /* ─── Main Claims Page ─── */
 export default function ClaimsPage() {
-  const practice = useQuery(api.practices.getByOwner);
+  const { convexUserId } = useAuth();
+  const practice = useQuery(api.practices.getByOwner, convexUserId ? { userId: convexUserId } : "skip");
   const claims = useQuery(
     api.claims.listByPractice,
     practice ? { practiceId: practice._id } : "skip"

@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/SupabaseAuthContext";
 import { useQuery, useMutation } from "convex/react";
 import {
   Activity,
@@ -98,12 +99,13 @@ function LoadingSkeleton() {
 }
 
 export default function DashboardPage() {
-  const practice = useQuery(api.practices.getByOwner);
+  const { convexUserId } = useAuth();
+  const practice = useQuery(api.practices.getByOwner, convexUserId ? { userId: convexUserId } : "skip");
   const ensureSeed = useMutation(api.init.ensureSeedData);
 
   useEffect(() => {
     if (practice === null || practice !== undefined) {
-      ensureSeed();
+      ensureSeed({ userId: convexUserId! });
     }
   }, [practice, ensureSeed]);
 

@@ -1,5 +1,5 @@
-import { useAuthActions } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
+import { useAuth } from "@/contexts/SupabaseAuthContext";
 import {
   BanknoteIcon,
   BarChart3,
@@ -94,7 +94,8 @@ function NavLink({
 
 function SidebarNav() {
   const location = useLocation();
-  const practice = useQuery(api.practices.getByOwner);
+  const { convexUserId } = useAuth();
+  const practice = useQuery(api.practices.getByOwner, convexUserId ? { userId: convexUserId } : "skip");
   const tasks = useQuery(
     api.tasks.listByPractice,
     practice ? { practiceId: practice._id } : "skip"
@@ -176,8 +177,9 @@ function SidebarNav() {
 }
 
 function SidebarUserMenu() {
-  const user = useQuery(api.auth.currentUser);
-  const { signOut } = useAuthActions();
+  const { user: supaUser } = useAuth();
+  const user = supaUser ? { name: supaUser.user_metadata?.name || supaUser.email?.split("@")[0], email: supaUser.email } : null;
+  const { signOut } = useAuth();
   const { theme, toggleTheme, switchable } = useTheme();
   const { setOpenMobile } = useSidebar();
 

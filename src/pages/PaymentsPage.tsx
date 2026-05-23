@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/SupabaseAuthContext";
 import { useMutation, useQuery } from "convex/react";
 import {
   ArrowLeftRight,
@@ -476,7 +477,8 @@ function ReconciliationTab({ practiceId }: { practiceId: Id<"practices"> }) {
 
 /* ─── Main Page ─── */
 export default function PaymentsPage() {
-  const practice = useQuery(api.practices.getByOwner);
+  const { convexUserId } = useAuth();
+  const practice = useQuery(api.practices.getByOwner, convexUserId ? { userId: convexUserId } : "skip");
   const payments = useQuery(
     api.paymentsList.listByPractice,
     practice ? { practiceId: practice._id } : "skip"

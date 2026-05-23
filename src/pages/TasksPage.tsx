@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/SupabaseAuthContext";
 import { useQuery, useMutation } from "convex/react";
 import {
   AlertTriangle,
@@ -112,7 +113,8 @@ function TaskCard({
 }
 
 export default function TasksPage() {
-  const practice = useQuery(api.practices.getByOwner);
+  const { convexUserId } = useAuth();
+  const practice = useQuery(api.practices.getByOwner, convexUserId ? { userId: convexUserId } : "skip");
   const tasks = useQuery(
     api.tasks.listByPractice,
     practice ? { practiceId: practice._id } : "skip"

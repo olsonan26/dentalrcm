@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/SupabaseAuthContext";
 import { useMutation, useQuery } from "convex/react";
 import {
   Activity,
@@ -240,7 +241,8 @@ function CreatePatientDialog({
 
 /* ─── Main Page ─── */
 export default function PatientsPage() {
-  const practice = useQuery(api.practices.getByOwner);
+  const { convexUserId } = useAuth();
+  const practice = useQuery(api.practices.getByOwner, convexUserId ? { userId: convexUserId } : "skip");
   const patients = useQuery(
     api.patients.listByPractice,
     practice ? { practiceId: practice._id } : "skip"

@@ -1,12 +1,12 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+// Auth import removed — userId passed as arg
 
 export const ensureSeedData = mutation({
-  args: {},
+  args: { userId: v.optional(v.id("users")) },
   returns: v.null(),
-  handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
+  handler: async (ctx, args) => {
+    const userId = args.userId ?? null;
     if (!userId) return null;
 
     // Check if this user already has a practice
