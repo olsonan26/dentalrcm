@@ -256,6 +256,7 @@ function AllPaymentsTab({
       </div>
       <Card>
         <CardContent className="p-0">
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
@@ -315,6 +316,7 @@ function AllPaymentsTab({
               )}
             </TableBody>
           </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -400,6 +402,7 @@ function ReconciliationTab({ practiceId }: { practiceId: Id<"practices"> }) {
       ) : (
         <Card>
           <CardContent className="p-0">
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
@@ -463,6 +466,7 @@ function ReconciliationTab({ practiceId }: { practiceId: Id<"practices"> }) {
                 ))}
               </TableBody>
             </Table>
+          </div>
           </CardContent>
         </Card>
       )}

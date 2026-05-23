@@ -3,6 +3,7 @@ import { useQuery } from "convex/react";
 import {
   BanknoteIcon,
   BarChart3,
+  CalendarDays,
   ClipboardList,
   FileText,
   LayoutDashboard,
@@ -19,6 +20,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { APP_NAME } from "@/lib/constants";
 import { api } from "../../convex/_generated/api";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { Badge } from "./ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +49,7 @@ const mainNav = [
 const rcmNav = [
   { href: "/claims", label: "Claims", icon: FileText },
   { href: "/patients", label: "Patients", icon: Users },
+  { href: "/appointments", label: "Appointments", icon: CalendarDays },
   { href: "/reports", label: "Reports", icon: BarChart3 },
   { href: "/tasks", label: "Tasks", icon: ClipboardList },
   { href: "/payments", label: "Payments", icon: BanknoteIcon },
@@ -62,11 +65,13 @@ function NavLink({
   label,
   icon: Icon,
   isActive,
+  badge,
 }: {
   href: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   isActive: boolean;
+  badge?: number;
 }) {
   const { setOpenMobile } = useSidebar();
 
@@ -75,7 +80,12 @@ function NavLink({
       <SidebarMenuButton asChild isActive={isActive}>
         <Link to={href} onClick={() => setOpenMobile(false)}>
           <Icon />
-          <span>{label}</span>
+          <span className="flex-1">{label}</span>
+          {badge !== undefined && badge > 0 && (
+            <Badge variant="secondary" className="ml-auto h-5 min-w-5 justify-center rounded-full px-1.5 text-[10px] font-semibold">
+              {badge > 99 ? "99+" : badge}
+            </Badge>
+          )}
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
@@ -84,6 +94,26 @@ function NavLink({
 
 function SidebarNav() {
   const location = useLocation();
+  const practice = useQuery(api.practices.getByOwner);
+  const tasks = useQuery(
+    api.tasks.listByPractice,
+    practice ? { practiceId: practice._id } : "skip"
+  );
+  const claims = useQuery(
+    api.dashboard.getStats,
+    practice ? { practiceId: practice._id } : "skip"
+  );
+
+  const openTasks = tasks?.filter((t) => t.status === "open" || t.status === "in_progress").length ?? 0;
+  const pendingClaims = claims?.claimsByStatus
+    ?.filter((s) => s.status === "scrubbing" || s.status === "ready" || s.status === "draft")
+    .reduce((sum, s) => sum + s.count, 0) ?? 0;
+
+  const getBadge = (href: string): number | undefined => {
+    if (href === "/tasks") return openTasks;
+    if (href === "/claims") return pendingClaims;
+    return undefined;
+  };
 
   return (
     <SidebarContent>
@@ -115,7 +145,8 @@ function SidebarNav() {
                 href={item.href}
                 label={item.label}
                 icon={item.icon}
-                isActive={location.pathname === item.href}
+                isActive={location.pathname === item.href || (item.href === "/patients" && location.pathname.startsWith("/patients/"))}
+                badge={getBadge(item.href)}
               />
             ))}
           </SidebarMenu>

@@ -20,9 +20,10 @@ export function Header() {
             className="flex items-center gap-2.5 font-semibold text-lg hover:opacity-80 transition-opacity"
           >
             <div className="size-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">
-                M
-              </span>
+              <svg viewBox="0 0 24 24" fill="none" className="size-5 text-primary-foreground" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6l-8-4z" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
             </div>
             <span className="hidden sm:inline">{APP_NAME}</span>
           </Link>

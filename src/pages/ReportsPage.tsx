@@ -414,7 +414,7 @@ function PayerPerformance({ practiceId }: { practiceId: string }) {
                     <p className="text-xs text-muted-foreground">billed</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <div>
                     <p className="text-xs text-muted-foreground">Collection Rate</p>
                     <p className={`text-sm font-bold ${payer.collectionRate >= 80 ? "text-success" : payer.collectionRate >= 50 ? "text-warning" : "text-destructive"}`}>
@@ -562,7 +562,7 @@ function ProviderProductivity({ practiceId }: { practiceId: string }) {
 function ReportSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i}><CardContent className="p-4"><Skeleton className="h-4 w-20 mb-2" /><Skeleton className="h-8 w-28" /></CardContent></Card>
         ))}

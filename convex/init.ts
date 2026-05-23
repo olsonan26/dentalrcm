@@ -360,6 +360,40 @@ export const ensureSeedData = mutation({
       for (const entry of auditEntries) {
         await ctx.db.insert("auditLogs", { practiceId, ...entry });
       }
+
+      // Appointments (seed data)
+      const today = new Date().toISOString().split("T")[0];
+      const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+      const dayAfter = new Date(Date.now() + 172800000).toISOString().split("T")[0];
+
+      // Get first 4 patients and 2 providers for appointments
+      const seedPatients = await ctx.db
+        .query("patients")
+        .withIndex("by_practice", (q) => q.eq("practiceId", practiceId))
+        .take(6);
+      const seedProviders = await ctx.db
+        .query("providers")
+        .withIndex("by_practice", (q) => q.eq("practiceId", practiceId))
+        .take(3);
+
+      if (seedPatients.length >= 4 && seedProviders.length >= 2) {
+        const appointmentSeeds = [
+          { patientId: seedPatients[0]._id, providerId: seedProviders[0]._id, title: "Routine Cleaning", date: today, startTime: "09:00", endTime: "09:45", type: "cleaning" as const, status: "confirmed" as const, insuranceVerified: true, estimatedCost: 150 },
+          { patientId: seedPatients[1]._id, providerId: seedProviders[0]._id, title: "Crown Prep — #14", date: today, startTime: "10:00", endTime: "11:00", type: "crown" as const, status: "checked_in" as const, insuranceVerified: true, estimatedCost: 1200 },
+          { patientId: seedPatients[2]._id, providerId: seedProviders[1]._id, title: "Composite Filling — #19 MOD", date: today, startTime: "11:30", endTime: "12:15", type: "filling" as const, status: "scheduled" as const, insuranceVerified: false, estimatedCost: 280 },
+          { patientId: seedPatients[3]._id, providerId: seedProviders[0]._id, title: "Comprehensive Exam + X-Rays", date: today, startTime: "14:00", endTime: "14:45", type: "exam" as const, status: "scheduled" as const, insuranceVerified: true, estimatedCost: 200 },
+          { patientId: seedPatients[0]._id, providerId: seedProviders[1]._id, title: "Root Canal — #30", date: tomorrow, startTime: "09:00", endTime: "10:30", type: "root_canal" as const, status: "scheduled" as const, insuranceVerified: true, estimatedCost: 950 },
+          { patientId: seedPatients[1]._id, providerId: seedProviders[0]._id, title: "Follow-Up — Post-Crown Check", date: tomorrow, startTime: "11:00", endTime: "11:30", type: "follow_up" as const, status: "scheduled" as const, insuranceVerified: true, estimatedCost: 0 },
+          { patientId: seedPatients[2]._id, providerId: seedProviders[1]._id, title: "Emergency — Cracked Tooth", date: tomorrow, startTime: "14:00", endTime: "15:00", type: "emergency" as const, status: "confirmed" as const, insuranceVerified: false, estimatedCost: 400 },
+          { patientId: seedPatients[3]._id, providerId: seedProviders[0]._id, title: "Prophylaxis + Fluoride", date: dayAfter, startTime: "09:00", endTime: "09:45", type: "cleaning" as const, status: "scheduled" as const, insuranceVerified: true, estimatedCost: 175 },
+          { patientId: seedPatients.length > 4 ? seedPatients[4]._id : seedPatients[0]._id, providerId: seedProviders[1]._id, title: "Extraction — #1 (Wisdom)", date: dayAfter, startTime: "10:00", endTime: "11:00", type: "extraction" as const, status: "scheduled" as const, insuranceVerified: true, estimatedCost: 350 },
+          { patientId: seedPatients.length > 5 ? seedPatients[5]._id : seedPatients[1]._id, providerId: seedProviders[0]._id, title: "Ortho Consultation", date: dayAfter, startTime: "13:00", endTime: "13:45", type: "consultation" as const, status: "scheduled" as const, insuranceVerified: false, estimatedCost: 150 },
+        ];
+
+        for (const appt of appointmentSeeds) {
+          await ctx.db.insert("appointments", { practiceId, ...appt });
+        }
+      }
     }
 
     return null;

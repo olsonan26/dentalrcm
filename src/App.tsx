@@ -7,6 +7,7 @@ import { PublicOnlyRoute } from "./components/PublicOnlyRoute";
 import { Toaster } from "./components/ui/sonner";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import {
+  AppointmentsPage,
   AuditLogPage,
   ClaimsPage,
   DashboardPage,
@@ -42,6 +43,7 @@ function App() {
               <Route path="/claims" element={<ClaimsPage />} />
               <Route path="/patients" element={<PatientsPage />} />
               <Route path="/patients/:id" element={<PatientDetailPage />} />
+              <Route path="/appointments" element={<AppointmentsPage />} />
               <Route path="/reports" element={<ReportsPage />} />
               <Route path="/tasks" element={<TasksPage />} />
               <Route path="/payments" element={<PaymentsPage />} />

@@ -403,7 +403,7 @@ export default function TeamPage() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <Users className="h-5 w-5 text-primary shrink-0" />

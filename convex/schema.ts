@@ -247,6 +247,49 @@ const schema = defineSchema({
     .index("by_user", ["userId"])
     .index("by_practice_and_user", ["practiceId", "userId"]),
 
+  // Appointments
+  appointments: defineTable({
+    practiceId: v.id("practices"),
+    patientId: v.id("patients"),
+    providerId: v.id("providers"),
+    title: v.string(),
+    date: v.string(), // YYYY-MM-DD
+    startTime: v.string(), // HH:mm
+    endTime: v.string(), // HH:mm
+    type: v.union(
+      v.literal("exam"),
+      v.literal("cleaning"),
+      v.literal("filling"),
+      v.literal("crown"),
+      v.literal("root_canal"),
+      v.literal("extraction"),
+      v.literal("implant"),
+      v.literal("orthodontics"),
+      v.literal("whitening"),
+      v.literal("emergency"),
+      v.literal("consultation"),
+      v.literal("follow_up"),
+      v.literal("other")
+    ),
+    status: v.union(
+      v.literal("scheduled"),
+      v.literal("confirmed"),
+      v.literal("checked_in"),
+      v.literal("in_progress"),
+      v.literal("completed"),
+      v.literal("cancelled"),
+      v.literal("no_show")
+    ),
+    notes: v.optional(v.string()),
+    insuranceVerified: v.optional(v.boolean()),
+    estimatedCost: v.optional(v.number()),
+  })
+    .index("by_practice", ["practiceId"])
+    .index("by_practice_and_date", ["practiceId", "date"])
+    .index("by_patient", ["patientId"])
+    .index("by_provider", ["providerId"])
+    .index("by_status", ["status"]),
+
   // Claim activity log (notes, status changes, scrub results, appeal letters)
   claimActivities: defineTable({
     practiceId: v.id("practices"),
