@@ -147,8 +147,10 @@ export function AppLayout() {
             <NotificationBell practiceId={practice?._id} />
           </div>
         </header>
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto">
+          <div className="w-full min-w-0">
           <Outlet />
+          </div>
         </main>
       </SidebarInset>
     </SidebarProvider>
